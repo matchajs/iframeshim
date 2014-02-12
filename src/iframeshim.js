@@ -1,6 +1,7 @@
 /**
  * thanks:
  *  http://mootools.net/docs/more/Utilities/IframeShim
+ *  https://github.com/aralejs/iframe-shim
  */
 define(function(require, exports, module) {
     var $ = require('jquery');
@@ -11,62 +12,29 @@ define(function(require, exports, module) {
     var defaultOptions = {
         includeMargin: false, // 覆盖范围是否包含元素的margin
         offset: '',
-        className: 'iframe-shim',
+        className: 'ui-iframe-shim',
         zIndex: null
     };
 
-    function createShim() {
-        var self = this, opts = self.options;
-        var $target = self.$target;
-
-        var style = {
-            position: 'absolute',
-            border: 'none',
-            opacity: 0
-        };
-
-        var zIndex = $target.css('zIndex');
-        if (zIndex && zIndex > 0) {
-            style.zIndex = zIndex - 1;
-        }
-        if (!opts.zIndex) {
-            style.zIndex = opts.zIndex;
-        }
-
-        var $shim = $('<iframe>', {
-            src: 'javascript:false;document.write("");',
-            frameborder: 0,
-            scrolling: 'no'
-        }).css(style);
-
-        $shim.insertBefore($target);
-
-        return $shim;
-    }
-
-    function IframeShim(element, options) {
+    var IframeShim = isIE6 ? function(element, options) {
         var self = this;
 
-        if (isIE6) {
-            self.options = $.extend({}, (options || {}), defaultOptions);
+        self.options = $.extend({}, (options || {}), defaultOptions);
 
-            var $target = $(element);
+        var $target = $(element);
 
-            if (!$target[0]) {
-                throw new Error('Invalid Element.');
-            }
-
-            self.$target = $target.eq(0); // 只能一对一
-            self.$shim = null;
-        } else {
-            self.position = self.show = self.hide = self.remove = function(){return self};
+        if (!$target[0]) {
+            throw new Error('Invalid Element.');
         }
 
-        return self;
-    }
+        self.$target = $target.eq(0); // 只能一对一
+        self.$shim = null;
 
-    IframeShim.prototype = {
-        constructor: IframeShim,
+
+        return self;
+    } : function() {};
+
+    var extendPrototype = isIE6 ? {
         position: function() {
             var self = this;
             var opts = self.options;
@@ -76,12 +44,12 @@ define(function(require, exports, module) {
             var targetWidth = $target.outerWidth(includeMargin);
             var targetHeight = $target.outerHeight(includeMargin);
 
-            if (!targetWidth || !targetHeight) {
+            if (!targetWidth || !targetHeight || $target.is(':hidden')) {
                 return self.hide();
             }
 
             var $shim = self.$shim;
-            if (!$shim[0]) {
+            if (!$shim || !$shim[0]) {
                 self.$shim = $shim = createShim.call(self);
             }
 
@@ -114,7 +82,48 @@ define(function(require, exports, module) {
             $shim && $shim.remove();
             return self;
         }
+    } : {
+        position: Noop,
+        show: Noop,
+        hide: Noop,
+        remove: Noop
     };
 
+    $.extend(IframeShim.prototype, extendPrototype);
+
     module.exports = IframeShim;
+
+    // Helpers
+
+    function Noop() {return this;}
+
+    function createShim() {
+        var self = this, opts = self.options;
+        var $target = self.$target;
+
+        var style = {
+            position: 'absolute',
+            border: 'none',
+            opacity: 0
+        };
+
+        if (opts.zIndex != null) {
+            style.zIndex = opts.zIndex;
+        } else {
+            var zIndex = $target.css('zIndex');
+            if (zIndex && zIndex > 0) {
+                style.zIndex = zIndex - 1;
+            }
+        }
+
+        var $shim = $('<iframe>', {
+            src: 'javascript:false;document.write("");',
+            frameborder: 0,
+            scrolling: 'no'
+        }).css(style);
+
+        $shim.insertBefore($target);
+
+        return $shim;
+    }
 });
