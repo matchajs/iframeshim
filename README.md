@@ -1,6 +1,6 @@
 #IframeShim
 
-在IE6下遮盖Select元素和Flash元素
+解决IE环境下，不能遮盖Select元素和Flash元素的问题。
 
 ---
 
@@ -11,35 +11,26 @@
 **参数**
 `element` 继承的父类
 `options` 要混入的实例属性，可以选择一下类型：
-+ `includeMargin` 
-+ `offset` 
-+ `className` iframe的className
-+ `zIndex` iframe的z-index值
++ `includeMargin` 覆盖范围是否包含元素的margin
++ `offset` iframe shim偏移位置, 类似CSS写法, 如: '10px 20px'
++ `className` iframe shim的样式
++ `zIndex` iframe shim的z-index值
 
 
 
 ###position  `shim.position()`
 
-重新定位的iframe元素。当需要移动或调整的iframe元素调用此方法。
+重新定位的iframe元素，当需要移动或调整的iframe元素可调用此方法。
 
 ```js
 /* 示例 1 */
 define(function(require, exports, module) {
     var IframeShim = require('iframeshim');
 
-    var shim = new IframeShim('#target').position();
-});
-```
+    var shim = new IframeShim('#target').show();
 
-```js
-/* 示例 2 */
-define(function(require, exports, module) {
-    var IframeShim = require('iframeshim');
-
-    var shim = new IframeShim('#target');
-
-    $target.css('display', 'block');
-    shim.position(); // 需要在目标元素显示之后才进行定位
+    $('#target').css('width', 300);
+    shim.position();
 });
 ```
 
@@ -53,9 +44,7 @@ define(function(require, exports, module) {
 define(function(require, exports, module) {
     var IframeShim = require('iframeshim');
 
-    var shim = new IframeShim('#target').position();
-
-    shim.hie(); // 隐藏
+    var shim = new IframeShim('#target');
 
     $('#button').click(function(){
         shim.show();
@@ -73,7 +62,7 @@ define(function(require, exports, module) {
 define(function(require, exports, module) {
     var IframeShim = require('iframeshim');
 
-    var shim = new IframeShim('#target').position();
+    var shim = new IframeShim('#target').show();
 
     $('#button').click(function(){
         shim.hide();
@@ -84,14 +73,14 @@ define(function(require, exports, module) {
 
 ###remove  `shim.remove()`
 
-将iframe元素移出DOM
+将iframe元素从DOM中移除
 
 ```js
 /* 示例 */
 define(function(require, exports, module) {
     var IframeShim = require('iframeshim');
 
-    var shim = new IframeShim('#target').position();
+    var shim = new IframeShim('#target').show();
 
     $('#button').click(function(){
         shim.remove();

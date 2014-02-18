@@ -1,46 +1,55 @@
 /**
  * thanks:
- *  http://mootools.net/docs/more/Utilities/IframeShim
- *  https://github.com/aralejs/iframe-shim
+ *  - http://mootools.net/docs/more/Utilities/IframeShim
+ *  - https://github.com/aralejs/iframe-shim
  */
 define(function(require, exports, module) {
-    var $ = require('jquery');
+    var $ = require('jquery-debug');
     var Position = require('position');
 
-    var isIE6 = (window.navigator.userAgent || '').toLowerCase().indexOf('msie 6') !== -1;
+    var isIE6 = (window.navigator.userAgent || '').toLowerCase().indexOf('msie') !== -1;
 
     var defaultOptions = {
         includeMargin: false, // 覆盖范围是否包含元素的margin
-        offset: '',
-        className: 'ui-iframe-shim',
+        offset: '', // iframe shim偏移位置, 类似CSS写法, 如: '10px 20px'
+        className: 'ui-iframe-shim', // iframe shim的样式
         zIndex: null
     };
 
-    var IframeShim = isIE6 ? function(element, options) {
+    function IframeShim(element, options) {
         var self = this;
 
-        self.options = $.extend({}, (options || {}), defaultOptions);
+        if (isIE6) {
+            self.options = $.extend({}, defaultOptions, (options || {}));
 
-        var $target = $(element);
+            var $target = $(element);
+            if (!$target[0]) {
+                throw new Error('Invalid Element.');
+            }
 
-        if (!$target[0]) {
-            throw new Error('Invalid Element.');
+            self.$target = $target.eq(0); // 一对一
+            self.$shim = null;
+        } else {
+            self.position = self.hide = self.show = self.remove = Noop;
         }
-
-        self.$target = $target.eq(0); // 只能一对一
-        self.$shim = null;
-
-
         return self;
-    } : function() {};
+    }
 
-    var extendPrototype = isIE6 ? {
+    $.extend(IframeShim.prototype, {
+        /**
+         * 定位iframe shim
+         * @returns {IframeShim}
+         */
         position: function() {
             var self = this;
             var opts = self.options;
-            var includeMargin = !!opts.includeMargin;
 
             var $target = self.$target;
+            if (!$target || !$target[0]) {
+                return self;
+            }
+
+            var includeMargin = !!opts.includeMargin;
             var targetWidth = $target.outerWidth(includeMargin);
             var targetHeight = $target.outerHeight(includeMargin);
 
@@ -53,6 +62,11 @@ define(function(require, exports, module) {
                 self.$shim = $shim = createShim.call(self);
             }
 
+            if (includeMargin) {
+                var targetMargin = getElementMargin($target);
+                var targetPos = -targetMargin.left + ' ' + -targetMargin.top;
+            }
+
             $shim.css({
                 width: targetWidth,
                 height: targetHeight
@@ -60,53 +74,78 @@ define(function(require, exports, module) {
 
             Position({
                 element: $shim, pos: opts.offset
-            }, $target);
+            }, {
+                element: $target, pos: (targetPos || '')
+            });
 
-            return self.show();
+            return self;
         },
+
+        /**
+         * 显示iframe shim并定位到目标元素位置
+         * @returns {IframeShim}
+         */
         show: function() {
             var self = this;
-            var $shim = self.$shim;
-            $shim && $shim.css('display', 'block');
+
+            self.position();
+
+            self.$shim.css('display', 'block');
+
             return self;
         },
+
+        /**
+         * 隐藏iframe shim
+         * @returns {IframeShim}
+         */
         hide: function() {
             var self = this;
+
             var $shim = self.$shim;
             $shim && $shim.css('display', 'none');
+
             return self;
         },
+
+        /**
+         * 移除iframe shim
+         * @returns {IframeShim}
+         */
         remove: function() {
             var self = this;
+
             var $shim = self.$shim;
             $shim && $shim.remove();
+            self.$shim = null;
+
             return self;
         }
-    } : {
-        position: Noop,
-        show: Noop,
-        hide: Noop,
-        remove: Noop
-    };
-
-    $.extend(IframeShim.prototype, extendPrototype);
+    });
 
     module.exports = IframeShim;
 
     // Helpers
+    function Noop() {
+        return this;
+    }
 
-    function Noop() {return this;}
-
+    /**
+     * 创建shim，默认display:none
+     * @returns {jQuery}
+     */
     function createShim() {
         var self = this, opts = self.options;
         var $target = self.$target;
 
         var style = {
             position: 'absolute',
+            top: '-9999px', left: '-9999px',
             border: 'none',
             opacity: 0
         };
 
+        // zIndex：配置 > 目标元素
         if (opts.zIndex != null) {
             style.zIndex = opts.zIndex;
         } else {
@@ -117,13 +156,48 @@ define(function(require, exports, module) {
         }
 
         var $shim = $('<iframe>', {
-            src: 'javascript:false;document.write("");',
+            src: 'javascript:"";document.write("");',
             frameborder: 0,
-            scrolling: 'no'
+            scrolling: 'no',
+            'class': opts.className
         }).css(style);
 
         $shim.insertBefore($target);
 
         return $shim;
+    }
+
+    function getElementMargin($el) {
+        var elementMargin = $el.css('margin');
+        elementMargin = elementMargin.split(' ');
+
+        var margin = {};
+        switch (elementMargin.length) {
+            case 4:
+                margin.top = toNumber(elementMargin[0]);
+                margin.right = toNumber(elementMargin[1]);
+                margin.bottom = toNumber(elementMargin[2]);
+                margin.left = toNumber(elementMargin[3]);
+                break;
+            case 3:
+                margin.top = toNumber(elementMargin[0]);
+                margin.right = margin.left = toNumber(elementMargin[1]);
+                margin.bottom = toNumber(elementMargin[2]);
+                break;
+            case 2:
+                margin.top = margin.bottom = toNumber(elementMargin[0]);
+                margin.right = margin.left = toNumber(elementMargin[1]);
+                break;
+            default:
+                margin.top = margin.right =
+                    margin.bottom = margin.left = toNumber(elementMargin[0]);
+                break;
+        }
+
+        return margin;
+    }
+
+    function toNumber(o) {
+        return parseFloat(o) || 0;
     }
 });

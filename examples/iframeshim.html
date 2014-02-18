@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="gbk">
+<title>iframeshim examples</title>
+<link charset="utf-8" rel="stylesheet" href="http://www.poco.cn/css_common/normalize/3.0.0/normalize.css">
+<style type="text/css">
+.example {
+    position: relative;
+    _zoom: 1;
+}
+.mask {
+    position:absolute;
+    background: rgba(255, 0, 0, 0.4);
+    background: none\9;
+
+    filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#66FF0000', endColorstr='#66FF0000')\9;
+}
+
+iframe{
+    cursor: help;
+}
+
+#example1 {
+    width:300px;
+    height:250px;
+    left:0;
+    top:0;
+    z-index:10
+}
+#example2 {
+    width: 150px;
+    height: 100px;
+    border: 5px solid #000;
+    padding:5px;
+    margin: 20px 10px 20px;
+    background: #999;
+    filter:none;
+}
+#example3 {
+    bottom: 0;
+    left: 0;
+}
+</style>
+<script src="http://cb.poco.cn/seajs/2.1.1/sea.js"></script>
+<!--[if lt IE 9]>
+<script src="http://cb.poco.cn/utility/html5shiv/3.7.0/html5shiv.js"></script>
+<![endif]-->
+<script>
+seajs.config({
+    paths: {
+        utility: 'http://cb.poco.cn/utility',
+        matcha: 'http://cb.poco.cn/matcha'
+    },
+    alias:{
+        jquery: 'utility/jquery/1.8.3/jquery',
+        'jquery-debug': 'utility/jquery/1.8.3/jquery-debug',
+
+        position: 'matcha/position/1.0.0/position-debug'
+    },
+    charset: 'utf-8'
+});
+</script>
+</head>
+
+<body>
+    <div class="global-container">
+        <section class="example-content">
+            <h3 id="1-创建遮罩">1. 创建遮罩</h3>
+            <div class="example">
+                <div class="mask" id="example1"></div>
+                <div>
+                    <div class="select">
+                        <select><option>option1</option></select>
+                        <select><option>option2</option></select>
+                        <select><option>option3</option></select>
+                    </div>
+                    <div class="input">
+                        <input type="text">
+                        <input type="radio">
+                        <input type="checkbox">
+                    </div>
+                    <div class="flash">
+                        <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+                    </div>
+                </div>
+            </div>
+            <script>
+            seajs.use(['jquery', '../src/iframeshim'], function($, IframeShim) {
+                var shim1 = new IframeShim('#example1').show();
+            });
+            </script>
+        </section>
+
+        <section class="example-content">
+            <h3 id="2-包含Margin的遮罩">2. 包含Margin的遮罩</h3>
+            <div class="example">
+                <div class="mask" id="example2">
+                    border-width:20px;<br>
+                    padding:10px;<br>
+                    margin:20px;
+                </div>
+                <p><img src="http://img226.poco.cn/mypoco/myphoto/20140213/17/5211813320140213170007048_640.jpg" width="375"></p>
+            </div>
+            <script>
+            seajs.use(['jquery', '../src/iframeshim'], function($, IframeShim) {
+                var shim2 = new IframeShim('#example2', {
+                    includeMargin: true
+                }).show();
+            });
+            </script>
+        </section>
+
+        <section class="example-content">
+            <h3 id="3-目标元素宽高改变">3. 目标元素宽高改变</h3>
+            <div class="example">
+                <button type="button" id="toggle-display-button" data-state="show">显示/隐藏</button>
+                <button type="button" id="change-button">点我点我</button>
+
+                <div id="example3" class="mask" style="width:280px;height:44px;">height:44</div>
+
+                <div class="flash">
+                    <p id="example3-txt" style="height:18px;line-height:18px;"></p>
+                    <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+                </div>
+            </div>
+            <script>
+            seajs.use(['jquery', '../src/iframeshim'], function($, IframeShim) {
+                var Random = function(start, end) {
+                    return parseInt(Math.random()*(end-start+1) + start);
+                };
+
+                var shim3 = new IframeShim('#example3').show();
+
+                var changeCount = 0;
+                $('#change-button').click(function() {
+                    ++changeCount;
+
+                    if (changeCount > 4) {
+                        shim3.remove();
+                        return false;
+                    } else if (changeCount > 3) {
+                        $('#example3-txt').html('你！！！再点我就给你好看');
+                    } else if (changeCount > 2) {
+                        $('#example3-txt').html('够了，你试下再点！');
+                    }
+
+                    var newHeight = Random(44, 200);
+                    $('#example3').css({
+                        height: newHeight
+                    }).html('height:' + newHeight);
+
+                    shim3.position();
+                });
+                $('#toggle-display-button').click(function() {
+                    if ($(this).attr('data-state') == 'show') {
+                        shim3.hide();
+                        $(this).attr('data-state', 'hide');
+                    } else {
+                        shim3.show();
+                        $(this).attr('data-state', 'show');
+                    }
+                });
+            });
+            </script>
+        </section>
+    </div>
+</body>
+</html>
