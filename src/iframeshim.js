@@ -4,7 +4,7 @@
  *  - https://github.com/aralejs/iframe-shim
  */
 define(function(require, exports, module) {
-    var $ = require('jquery-debug');
+    var $ = require('jquery');
     var Position = require('position');
 
     var isIE6 = (window.navigator.userAgent || '').toLowerCase().indexOf('msie') !== -1;
@@ -37,7 +37,7 @@ define(function(require, exports, module) {
 
     $.extend(IframeShim.prototype, {
         /**
-         * 定位iframe shim
+         * iframe shim定位到目标元素
          * @returns {IframeShim}
          */
         position: function() {
@@ -49,11 +49,15 @@ define(function(require, exports, module) {
                 return self;
             }
 
+            if ($target.is(':hidden')) {
+                return self.hide();
+            }
+
             var includeMargin = !!opts.includeMargin;
             var targetWidth = $target.outerWidth(includeMargin);
             var targetHeight = $target.outerHeight(includeMargin);
 
-            if (!targetWidth || !targetHeight || $target.is(':hidden')) {
+            if (!targetWidth || !targetHeight) {
                 return self.hide();
             }
 
@@ -69,7 +73,8 @@ define(function(require, exports, module) {
 
             $shim.css({
                 width: targetWidth,
-                height: targetHeight
+                height: targetHeight,
+                display: 'block'
             });
 
             Position({
@@ -77,20 +82,6 @@ define(function(require, exports, module) {
             }, {
                 element: $target, pos: (targetPos || '')
             });
-
-            return self;
-        },
-
-        /**
-         * 显示iframe shim并定位到目标元素位置
-         * @returns {IframeShim}
-         */
-        show: function() {
-            var self = this;
-
-            self.position();
-
-            self.$shim.css('display', 'block');
 
             return self;
         },

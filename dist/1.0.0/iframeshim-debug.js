@@ -3,8 +3,8 @@
  *  - http://mootools.net/docs/more/Utilities/IframeShim
  *  - https://github.com/aralejs/iframe-shim
  */
-define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug-debug", "matcha/position/1.0.0/position-debug" ], function(require, exports, module) {
-    var $ = require("jquery-debug-debug");
+define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug", "matcha/position/1.0.0/position-debug" ], function(require, exports, module) {
+    var $ = require("jquery-debug");
     var Position = require("matcha/position/1.0.0/position-debug");
     var isIE6 = (window.navigator.userAgent || "").toLowerCase().indexOf("msie") !== -1;
     var defaultOptions = {
@@ -34,7 +34,7 @@ define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug-debug", "matc
     }
     $.extend(IframeShim.prototype, {
         /**
-         * 定位iframe shim
+         * iframe shim定位到目标元素
          * @returns {IframeShim}
          */
         position: function() {
@@ -44,10 +44,13 @@ define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug-debug", "matc
             if (!$target || !$target[0]) {
                 return self;
             }
+            if ($target.is(":hidden")) {
+                return self.hide();
+            }
             var includeMargin = !!opts.includeMargin;
             var targetWidth = $target.outerWidth(includeMargin);
             var targetHeight = $target.outerHeight(includeMargin);
-            if (!targetWidth || !targetHeight || $target.is(":hidden")) {
+            if (!targetWidth || !targetHeight) {
                 return self.hide();
             }
             var $shim = self.$shim;
@@ -60,7 +63,8 @@ define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug-debug", "matc
             }
             $shim.css({
                 width: targetWidth,
-                height: targetHeight
+                height: targetHeight,
+                display: "block"
             });
             Position({
                 element: $shim,
@@ -69,16 +73,6 @@ define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug-debug", "matc
                 element: $target,
                 pos: targetPos || ""
             });
-            return self;
-        },
-        /**
-         * 显示iframe shim并定位到目标元素位置
-         * @returns {IframeShim}
-         */
-        show: function() {
-            var self = this;
-            self.position();
-            self.$shim.css("display", "block");
             return self;
         },
         /**
