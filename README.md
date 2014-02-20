@@ -23,7 +23,7 @@
 定位的iframe元素，当需要移动或调整的iframe元素可调用此方法。
 
 ```js
-/* 示例 1 */
+/* 示例 */
 define(function(require, exports, module) {
     var IframeShim = require('iframeshim');
 
