@@ -12,8 +12,8 @@
 `element` 被遮挡的目标元素，可传 Selector、DOM
 `options` 要混入的实例属性，可以选择一下类型：
 + `includeMargin` 覆盖范围是否包含目标元素的margin，默认 `false`
-+ `offset` iframe shim偏移位置, 类似CSS写法, 如: '10px 20px'，默认 `''`
-+ `className` iframe shim的样式，默认 `ui-iframe-shim`
++ `offset` iframe shim偏移位置, 类似CSS写法, 如: `'10px 20px'`，默认 `''`
++ `className` iframe shim的样式，默认 `'ui-iframe-shim'`
 + `zIndex` iframe shim的z-index值，默认 `null`
 
 
