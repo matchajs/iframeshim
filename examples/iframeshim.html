@@ -81,13 +81,13 @@ seajs.config({
                         <input type="checkbox">
                     </div>
                     <div class="flash">
-                        <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+                        <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash">
                     </div>
                 </div>
             </div>
             <script>
             seajs.use(['jquery', '../src/iframeshim'], function($, IframeShim) {
-                var shim1 = new IframeShim('#example1').show();
+                var shim1 = new IframeShim('#example1').position();
             });
             </script>
         </section>
@@ -106,7 +106,7 @@ seajs.config({
             seajs.use(['jquery', '../src/iframeshim'], function($, IframeShim) {
                 var shim2 = new IframeShim('#example2', {
                     includeMargin: true
-                }).show();
+                }).position();
             });
             </script>
         </section>
@@ -121,7 +121,7 @@ seajs.config({
 
                 <div class="flash">
                     <p id="example3-txt" style="height:18px;line-height:18px;"></p>
-                    <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
+                    <embed src="http://player.youku.com/player.php/sid/XNjA3NzA5MjUy/v.swf" allowFullScreen="true" quality="high" width="280" height="200" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash">
                 </div>
             </div>
             <script>
@@ -130,7 +130,7 @@ seajs.config({
                     return parseInt(Math.random()*(end-start+1) + start);
                 };
 
-                var shim3 = new IframeShim('#example3').show();
+                var shim3 = new IframeShim('#example3').position();
 
                 var changeCount = 0;
                 $('#change-button').click(function() {
@@ -157,7 +157,7 @@ seajs.config({
                         shim3.hide();
                         $(this).attr('data-state', 'hide');
                     } else {
-                        shim3.show();
+                        shim3.position();
                         $(this).attr('data-state', 'show');
                     }
                 });

@@ -28,7 +28,7 @@ define("matcha/iframeshim/1.0.0/iframeshim-debug", [ "jquery-debug", "matcha/pos
             // 一对一
             self.$shim = null;
         } else {
-            self.position = self.hide = self.show = self.remove = Noop;
+            self.position = self.hide = self.remove = Noop;
         }
         return self;
     }

@@ -30,7 +30,7 @@ define(function(require, exports, module) {
             self.$target = $target.eq(0); // 一对一
             self.$shim = null;
         } else {
-            self.position = self.hide = self.show = self.remove = Noop;
+            self.position = self.hide = self.remove = Noop;
         }
         return self;
     }
